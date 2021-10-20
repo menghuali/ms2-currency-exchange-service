@@ -1,12 +1,12 @@
 package com.aloha.microservices.currencyexchangeservice;
 
-import java.math.BigDecimal;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class CurrencyExchangeController {
@@ -14,10 +14,16 @@ public class CurrencyExchangeController {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    private CurrencyExchangeRepo repo;
+
     @GetMapping("/currency-exchange/from/{from}/to/{to}")
     public CurrencyExchange getExchangeRate(@PathVariable("from") String from, @PathVariable("to") String to) {
-        return CurrencyExchange.builder().id(1001l).from(from).to(to).conversionMultiplier(BigDecimal.valueOf(50))
-                .environment(environment.getProperty("local.server.port")).build();
+        CurrencyExchange exchg = repo.findByFromAndTo(from, to);
+        if (exchg == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found currency exchange");
+        exchg.setEnvironment(environment.getProperty("local.server.port"));
+        return exchg;
     }
 
 }
