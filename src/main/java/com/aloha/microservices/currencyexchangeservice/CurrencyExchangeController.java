@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 public class CurrencyExchangeController {
 
@@ -19,6 +22,7 @@ public class CurrencyExchangeController {
 
     @GetMapping("/currency-exchange/from/{from}/to/{to}")
     public CurrencyExchange getExchangeRate(@PathVariable("from") String from, @PathVariable("to") String to) {
+        log.info("getExchangeRate called with from {} to {}", from, to);
         CurrencyExchange exchg = repo.findByFromAndTo(from, to);
         if (exchg == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot found currency exchange");
